@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clynic.AI - Transforme sua Clínica com IA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+        
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .slide-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s;
+            padding: 3rem;
+            overflow-y: auto;
+        }
+        
+        .slide.active {
+            opacity: 1;
+            z-index: 1;
+        }
+        
+        /* Controls */
+        .controls {
+            background: #1e293b;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        button {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .btn-prev {
+            background: #475569;
+            color: white;
+        }
+        
+        .btn-prev:hover:not(:disabled) {
+            background: #64748b;
+        }
+        
+        .btn-next {
+            background: #a855f7;
+            color: white;
+        }
+        
+        .btn-next:hover:not(:disabled) {
+            background: #9333ea;
+        }
+        
+        .indicators {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #475569;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .indicator.active {
+            width: 48px;
+            border-radius: 6px;
+            background: #a855f7;
+        }
+        
+        /* Utilities */
+        .text-center { text-align: center; }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        /* Slide 1 - Cover */
+        #slide1 {
+            background: linear-gradient(135deg, #06b6d4 0%, #a855f7 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .logo-section h1 {
+            font-size: 5rem;
+            font-weight: 700;
+        }
+        
+        .cover-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        
+        .cover-subtitle {
+            font-size: 1.75rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        .cover-tag {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+        }
+        
+        /* Slide 2 - Problem */
+        #slide2 {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        .slide-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+        
+        .problem-card {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .problem-text {
+            font-size: 1.25rem;
+            color: #475569;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .problem-impact {
+            color: #dc2626;
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+        
+        /* Slide 3 - Impact */
+        #slide3 {
+            background: linear-gradient(135deg, #fef2f2 0%, #fed7aa 100%);
+        }
+        
+        .metric-card {
+            text-align: center;
+            padding: 2.5rem;
+        }
+        
+        .metric-value {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .metric-value.red { color: #ef4444; }
+        .metric-value.orange { color: #f97316; }
+        
+        .metric-label {
+            font-size: 1.25rem;
+            color: #64748b;
+        }
+        
+        .impact-footer {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 1.75rem;
+            color: #475569;
+            font-weight: 600;
+        }
+        
+        /* Slide 4 - Solution */
+        #slide4 {
+            background: linear-gradient(135deg, #faf5ff 0%, #fce7f3 100%);
+        }
+        
+        .solution-card {
+            border-top: 4px solid #a855f7;
+        }
+        
+        .solution-card .icon {
+            color: #a855f7;
+        }
+        
+        .solution-card h3 {
+            font-size: 1.5rem;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+        
+        .solution-card p {
+            font-size: 1.125rem;
+            color: #64748b;
+        }
+        
+        /* Slide 5 - Demo */
+        #slide5 {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        }
+        
+        .demo-box {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .demo-header {
+            background: linear-gradient(90deg, #a855f7 0%, #ec4899 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        
+        .demo-step {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: #f1f5f9;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+        
+        .demo-time {
+            background: #e9d5ff;
+            color: #7c3aed;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .demo-action {
+            font-size: 1.25rem;
+            color: #475569;
+        }
+        
+        /* Slide 6 - Benefits */
+        #slide6 {
+            background: linear-gradient(135deg, #f0fdf4 0%, #d1fae5 100%);
+        }
+        
+        .benefit-card {
+            text-align: center;
+            padding: 2.5rem;
+        }
+        
+        .benefit-metric {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #16a34a;
+            margin: 1.5rem 0 1rem;
+        }
+        
+        .benefit-text {
+            font-size: 1.25rem;
+            color: #475569;
+        }
+        
+        /* Slide 7 - ROI */
+        #slide7 {
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+        }
+        
+        .roi-box {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .roi-comparison {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+        
+        .roi-item {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 1rem;
+        }
+        
+        .roi-item.invest {
+            background: #e2e8f0;
+        }
+        
+        .roi-item.economy {
+            background: #d1fae5;
+        }
+        
+        .roi-label {
+            font-size: 1.125rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .roi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .roi-item.economy .roi-value {
+            color: #16a34a;
+        }
+        
+        .roi-breakdown {
+            margin-bottom: 2.5rem;
+        }
+        
+        .roi-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            background: #d1fae5;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .roi-line-label {
+            font-size: 1.125rem;
+            color: #475569;
+        }
+        
+        .roi-line-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #16a34a;
+        }
+        
+        .roi-total {
+            background: linear-gradient(90deg, #16a34a 0%, #059669 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+        }
+        
+        .roi-total-label {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .roi-total-value {
+            font-size: 4rem;
+            font-weight: 700;
+        }
+        
+        /* Slide 8 - CTA */
+        #slide8 {
+            background: linear-gradient(135deg, #4f46e5 0%, #a855f7 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cta-box {
+            max-width: 900px;
+        }
+        
+        .cta-title {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+        }
+        
+        .cta-offer {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 2rem;
+            padding: 3rem;
+        }
+        
+        .cta-offer h3 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .cta-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        
+        .cta-feature {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.25rem;
+            text-align: left;
+        }
+        
+        .cta-button {
+            width: 100%;
+            background: white;
+            color: #a855f7;
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .cta-button:hover {
+            background: #f3e8ff;
+        }
+        
+        .cta-contact {
+            font-size: 1.125rem;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        <div class="slide-container">
+            <!-- Slide 1: Cover -->
+            <div id="slide1" class="slide active">
+                <div class="text-center">
+                    <div class="logo-section">
+                        <svg width="120" height="120" viewBox="0 0 200 200">
+                            <path d="M 60 0 L 140 0 L 140 60 L 200 60 L 200 140 L 140 140 L 140 200 L 60 200 L 60 140 L 0 140 L 0 60 L 60 60 Z" fill="#06b6d4"/>
+                            <circle cx="140" cy="100" r="55" fill="#a855f7"/>
+                            <path d="M 140 60 Q 150 75, 140 90 Q 130 105, 140 120 Q 150 135, 140 150" stroke="white" stroke-width="12" fill="none" stroke-linecap="round"/>
+                            <path d="M 140 60 Q 130 75, 140 90 Q 150 105, 140 120 Q 130 135, 140 150" stroke="white" stroke-width="12" fill="none" stroke-linecap="round"/>
+                        </svg>
+                        <h1>Clynic.AI</h1>
+                    </div>
+                    <h2 class="cover-title">Transforme sua Clínica com<br>Inteligência Artificial</h2>
+                    <p class="cover-subtitle">Mais tempo para cuidar, menos tempo com burocracia</p>
+                    <div class="cover-tag">
+                        Solução Personalizada para sua Clínica de Ginecologia/Obstetrícia
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2: Problems -->
+            <div id="slide2" class="slide">
+                <h2 class="slide-title">Você está perdendo tempo e dinheiro?</h2>
+                <div class="grid-2">
+                    <div class="card problem-card">
+                        <div class="icon">📞</div>
+                        <p class="problem-text">Recepção sobrecarregada com ligações repetitivas</p>
+                        <p class="problem-impact">2-3h por dia</p>
+                    </div>
+                    <div class="card problem-card">
+                        <div class="icon">📅</div>
+                        <p class="problem-text">Pacientes faltam sem avisar</p>
+                        <p class="problem-impact">20-30% das consultas</p>
+                    </div>
+                    <div class="card problem-card">
+                        <div class="icon">💬</div>
+                        <p class="problem-text">WhatsApp perdido entre mensagens pessoais</p>
+                        <p class="problem-impact">Atendimento desorganizado</p>
+                    </div>
+                    <div class="card problem-card">
+                        <div class="icon">⏰</div>
+                        <p class="problem-text">Mesmas dúvidas respondidas várias vezes</p>
+                        <p class="problem-impact">Tempo desperdiçado</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3: Impact -->
+            <div id="slide3" class="slide">
+                <h2 class="slide-title">O Custo Real do Problema</h2>
+                <div class="grid-2">
+                    <div class="card metric-card">
+                        <div class="metric-value red">R$ 300</div>
+                        <div class="metric-label">Valor médio perdido por cada falta</div>
+                    </div>
+                    <div class="card metric-card">
+                        <div class="metric-value red">6-8</div>
+                        <div class="metric-label">Faltas por semana em média</div>
+                    </div>
+                    <div class="card metric-card">
+                        <div class="metric-value red">R$ 9.600</div>
+                        <div class="metric-label">Perda mensal com consultas não realizadas</div>
+                    </div>
+                    <div class="card metric-card">
+                        <div class="metric-value orange">60h</div>
+                        <div class="metric-label">Horas mensais da equipe em tarefas repetitivas</div>
+                    </div>
+                </div>
+                <div class="impact-footer">
+                    💰 Isso representa mais de <span style="color: #dc2626;">R$ 115.000/ano</span> em perdas
+                </div>
+            </div>
+
+            <!-- Slide 4: Solution -->
+            <div id="slide4" class="slide">
+                <h2 class="slide-title">A Solução: Assistente de IA 24/7</h2>
+                <div class="grid-2">
+                    <div class="card solution-card">
+                        <div class="icon">🤖</div>
+                        <h3>Atendimento Automatizado</h3>
+                        <p>Responde pacientes no WhatsApp instantaneamente</p>
+                    </div>
+                    <div class="card solution-card">
+                        <div class="icon">📅</div>
+                        <h3>Gestão de Agendamentos</h3>
+                        <p>Confirma, reagenda e reduz faltas automaticamente</p>
+                    </div>
+                    <div class="card solution-card">
+                        <div class="icon">💬</div>
+                        <h3>Triagem Inteligente</h3>
+                        <p>Orienta sobre exames e qualifica urgências</p>
+                    </div>
+                    <div class="card solution-card">
+                        <div class="icon">👥</div>
+                        <h3>CRM Automatizado</h3>
+                        <p>Lembretes de retorno e acompanhamento de pacientes</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 5: Demo -->
+            <div id="slide5" class="slide">
+                <h2 class="slide-title">Como Funciona na Prática</h2>
+                <div class="demo-box">
+                    <div class="card">
+                        <div class="demo-header">📋 Paciente agenda colposcopia</div>
+                        <div class="demo-step">
+                            <div class="demo-time">Imediato</div>
+                            <div class="demo-action">IA confirma agendamento e envia orientações de preparo</div>
+                        </div>
+                        <div class="demo-step">
+                            <div class="demo-time">48h antes</div>
+                            <div class="demo-action">Lembrete automático enviado</div>
+                        </div>
+                        <div class="demo-step">
+                            <div class="demo-time">24h antes</div>
+                            <div class="demo-action">Confirmação final solicitada</div>
+                        </div>
+                        <div class="demo-step">
+                            <div class="demo-time">Após consulta</div>
+                            <div class="demo-action">Follow-up e orientações pós-procedimento</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 6: Benefits -->
+            <div id="slide6" class="slide">
+                <h2 class="slide-title">Benefícios Comprovados</h2>
+                <div class="grid-2">
+                    <div class="card benefit-card">
+                        <div class="icon">📈</div>
+                        <div class="benefit-metric">40%</div>
+                        <div class="benefit-text">Redução de pacientes que faltam</div>
+                    </div>
+                    <div class="card benefit-card">
+                        <div class="icon">⏰</div>
+                        <div class="benefit-metric">15h/semana</div>
+                        <div class="benefit-text">Tempo liberado da equipe</div>
+                    </div>
+                    <div class="card benefit-card">
+                        <div class="icon">💰</div>
+                        <div class="benefit-metric">R$ 5.760</div>
+                        <div class="benefit-text">Economia mensal média</div>
+                    </div>
+                    <div class="card benefit-card">
+                        <div class="icon">✅</div>
+                        <div class="benefit-metric">95%</div>
+                        <div class="benefit-text">Satisfação das pacientes</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 7: ROI -->
+            <div id="slide7" class="slide">
+                <h2 class="slide-title">Retorno sobre Investimento</h2>
+                <div class="roi-box">
+                    <div class="card">
+                        <div class="roi-comparison">
+                            <div class="roi-item invest">
+                                <div class="roi-label">Investimento Mensal</div>
+                                <div class="roi-value">R$ 747</div>
+                            </div>
+                            <div class="roi-item economy">
+                                <div class="roi-label">Economia Total</div>
+                                <div class="roi-value">R$ 7.440</div>
+                            </div>
+                        </div>
+                        <div class="roi-breakdown">
+                            <div class="roi-line">
+                                <span class="roi-line-label">Redução de faltas em consultas (40%)</span>
+                                <span class="roi-line-value">+ R$ 3.840</span>
+                            </div>
+                            <div class="roi-line">
+                                <span class="roi-line-label">Tempo da equipe liberado</span>
+                                <span class="roi-line-value">+ R$ 2.400</span>
+                            </div>
+                            <div class="roi-line">
+                                <span class="roi-line-label">Aumento de retenção</span>
+                                <span class="roi-line-value">+ R$ 1.200</span>
+                            </div>
+                        </div>
+                        <div class="roi-total">
+                            <div class="roi-total-label">ROI (Retorno sobre Investimento)</div>
+                            <div class="roi-total-value">896%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 8: CTA -->
+            <div id="slide8" class="slide">
+                <div class="cta-box text-center">
+                    <h2 class="cta-title">Próximo Passo</h2>
+                    <div class="cta-offer">
+                        <h3>Teste Gratuito por 14 Dias</h3>
+                        <div class="cta-features">
+                            <div class="cta-feature">
+                                <span>✅</span>
+                                <span>Implementação completa</span>
+                            </div>
+                            <div class="cta-feature">
+                                <span>✅</span>
+                                <span>Treinamento da equipe</span>
+                            </div>
+                            <div class="cta-feature">
+                                <span>✅</span>
+                                <span>Suporte prioritário</span>
+                            </div>
+                            <div class="cta-feature">
+                                <span>✅</span>
+                                <span>Sem compromisso, cancele quando quiser</span>
+                            </div>
+                        </div>
+                        <button class="cta-button">Começar Teste Gratuito Agora</button>
+                        <p class="cta-contact">📞 Entre em contato para agendar uma demonstração personalizada</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn-prev" onclick="changeSlide(-1)">← Anterior</button>
+            <div class="indicators" id="indicators"></div>
+            <button class="btn-next" onclick="changeSlide(1)">Próximo →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 8;
+        
+        // Create indicators
+        const indicatorsDiv = document.getElementById('indicators');
+        for (let i = 0; i < totalSlides; i++) {
+            const indicator = document.createElement('div');
+            indicator.className = 'indicator' + (i === 0 ? ' active' : '');
+            indicator.onclick = () => goToSlide(i);
+            indicatorsDiv.appendChild(indicator);
+        }
+        
+        function updateSlide() {
+            // Update slides
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            
+            // Update indicators
+            const indicators = document.querySelectorAll('.indicator');
+            indicators.forEach((ind, index) => {
+                ind.classList.toggle('active', index === currentSlide);
+            });
+            
+            // Update buttons
+            document.querySelector('.btn-prev').disabled = currentSlide === 0;
+            document.querySelector('.btn-next').disabled = currentSlide === totalSlides - 1;
+        }
+        
+        function changeSlide(direction) {
+            const newSlide = currentSlide + direction;
+            if (newSlide >= 0 && newSlide < totalSlides) {
+                currentSlide = newSlide;
+                updateSlide();
+            }
+        }
+        
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlide();
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') changeSlide(1);
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+        });
+    </script>
+</body>
+</html>
